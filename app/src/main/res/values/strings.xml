@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">LearnCompose</string>
+    <string name="wellcome_message">Welcome, What\'s your name?</string>
+    <string name="hello">hello, %1$s. \nNice to meet you.</string>
+    <string name="hint">enter your name: </string>
+    <string name="done">Done</string>
+</resources>
