@@ -4,4 +4,6 @@
     <string name="hello">hello, %1$s. \nNice to meet you.</string>
     <string name="hint">enter your name: </string>
     <string name="done">Done</string>
+    <string name="number_select_pattern">%1$d!</string>
+    <string name="number_result_pattern">%1$d! = %2$d</string>
 </resources>

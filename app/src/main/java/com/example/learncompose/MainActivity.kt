@@ -1,43 +1,26 @@
 package com.example.learncompose
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.example.learncompose.ui.theme.LearnComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -59,121 +42,105 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun App() {
-    Hello()
+    Content()
 }
 
-@Preview(
-    group = "group-2"
-)
 @Composable
-fun Welcome() {
-    Text(
-        text = stringResource(id = R.string.wellcome_message),
-        style = MaterialTheme.typography.bodyLarge
-    )
-}
-
-@Preview(
-    group = "group-1"
-)
-@Composable
-fun Greeting(
-    @PreviewParameter(HelloProvider::class)
-    name: String
+fun ListOfChoices(
+    onNumberSelect: (number: Int) -> Unit
 ) {
-    Text(
-        text = stringResource(id = R.string.hello, name),
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.bodyLarge
-    )
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TextAndButton(
-    name: MutableState<String>,
-    nameEntered: MutableState<Boolean>
-) {
-    Row(
-        modifier = Modifier.padding(top = 8.dp)
-    ) {
-        TextField(
-            value = name.value,
-            onValueChange = {
-                name.value = it
-            },
-            placeholder = {
-                Text(text = stringResource(R.string.hint))
-            },
-            modifier = Modifier
-                .alignByBaseline()
-                .weight(1f),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                autoCorrect = false,
-                capitalization = KeyboardCapitalization.Words
-            ),
-            keyboardActions = KeyboardActions( onAny = {
-                nameEntered.value = true
-            })
-        )
-        Button(
-            modifier = Modifier
-                .alignByBaseline()
-                .padding(8.dp),
-            onClick = {
-                nameEntered.value = true
-            },
-            enabled = nameEntered.value
-        ) {
-            Text(text = stringResource(R.string.done))
-        }
-    }
-}
-
-@Composable
-fun Hello() {
-    val name = remember {
-        mutableStateOf("")
-    }
-    val nameEntered = remember {
-        mutableStateOf(false)
-    }
-
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .fillMaxHeight()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        if (nameEntered.value) {
-            Greeting(name = name.value)
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                Welcome()
-                TextAndButton(name = name, nameEntered = nameEntered)
+        (0 until 10).forEach { number ->
+            Button(
+                onClick = {
+                    onNumberSelect(number)
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.number_select_pattern, number),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                )
             }
         }
     }
 }
 
 @Preview(
-    showBackground = true,
-    showSystemUi = true,
-    device = Devices.PHONE
+    name = "number list"
 )
 @Composable
-fun Preview_Hello() {
-    Hello()
+fun Preview_ListOfChoices() {
+    ListOfChoices(
+        onNumberSelect = {}
+    )
 }
 
-class HelloProvider() : PreviewParameterProvider<String> {
-    override val values: Sequence<String>
-        get() =
-            listOf("PreviewParameterProvider").asSequence()
+@Composable
+fun ComposeResult(
+    numberSelected: Int,
+    res: Int
+) {
+    Text(
+        text = stringResource(R.string.number_result_pattern, numberSelected, res),
+        style = MaterialTheme.typography.bodyLarge
+    )
+}
+
+@Preview(
+    name = "compose result"
+)
+@Composable
+fun Preview_ComposeResult() {
+    ComposeResult(
+        numberSelected = 1,
+        res = 1
+    )
+}
+
+@Preview
+@Composable
+fun Content() {
+    val selectedNumber = remember {
+        mutableStateOf<Int>(0)
+    }
+    val composeResult = remember {
+        mutableStateOf<Int>(0)
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ListOfChoices { number ->
+            selectedNumber.value = number
+            composeResult.value = getFactorialResult(selectedNumber.value)
+        }
+
+        ComposeResult(
+            numberSelected = selectedNumber.value,
+            res = composeResult.value
+        )
+    }
+}
+
+fun getFactorialResult(number: Int): Int {
+    if (number == 0) return 1
+
+    var res = 1
+
+    (1 until number + 1).forEach {
+        res *= it
+    }
+
+    return res
 }
