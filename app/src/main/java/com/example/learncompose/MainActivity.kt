@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun App() {
+    Hello()
 }
 
 @Preview(
@@ -123,7 +124,8 @@ fun TextAndButton(
                 .padding(8.dp),
             onClick = {
                 nameEntered.value = true
-            }
+            },
+            enabled = nameEntered.value
         ) {
             Text(text = stringResource(R.string.done))
         }
