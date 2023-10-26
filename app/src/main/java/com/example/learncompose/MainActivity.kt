@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
@@ -19,12 +17,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.example.learncompose.ui.theme.LearnComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -48,118 +46,135 @@ class MainActivity : ComponentActivity() {
 fun App() {
 }
 
-@Preview
 @Composable
-fun PredefinedLayoutDemo() {
-    var isRedChecked by remember {
-        mutableStateOf(true)
-    }
-    var isGreenChecked by remember {
-        mutableStateOf(true)
-    }
-    var isBlueChecked by remember {
-        mutableStateOf(true)
-    }
-
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        CheckBoxWithTag(checked = isRedChecked, text = "Red") {
-            isRedChecked = it
-        }
-        CheckBoxWithTag(checked = isGreenChecked, text = "Green") {
-            isGreenChecked = it
-        }
-        CheckBoxWithTag(checked = isBlueChecked, text = "Blue") {
-            isBlueChecked = it
-        }
-
-
-        StackedBoxes(
-            isOuterBoxShow = isRedChecked,
-            isMiddleBoxShow = isGreenChecked,
-            isInnerBoxShow = isBlueChecked
-        )
-    }
-}
-
-@Composable
-fun CheckBoxWithTag(
+fun CheckBoxWithLabel(
     checked: Boolean,
-    text: String,
-    onCheckedChange: (Boolean) -> Unit
+    label: String,
+    onClicked: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier
-            .padding(16.dp)
-            .clickable {
-                onCheckedChange(!checked)
-            },
-        verticalAlignment = Alignment.CenterVertically
+    ConstraintLayout(
+        modifier = modifier.clickable {
+            onClicked(!checked)
+        }
     ) {
+        val (checkbox, text) = createRefs()
+
         Checkbox(
             checked = checked,
-            onCheckedChange = onCheckedChange,
-            modifier = Modifier.alignByBaseline()
+            onCheckedChange = onClicked,
+            modifier = Modifier.constrainAs(checkbox) {}
         )
 
         Text(
-            text = text,
-            textAlign = TextAlign.Center,
+            text = label,
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .alignByBaseline()
-                .padding(start = 8.dp)
+            modifier = Modifier.constrainAs(text) {
+                start.linkTo(checkbox.end, margin = 8.dp)
+                bottom.linkTo(checkbox.bottom)
+                top.linkTo(checkbox.top)
+            }
         )
     }
 }
 
 @Preview
 @Composable
-fun Preview_CheckBoxWithTag() {
-    CheckBoxWithTag(
-        checked = true,
-        text = "Red",
-        onCheckedChange = {}
-    )
+fun Preview_CheckBoxWithLabel() {
+    CheckBoxWithLabel(checked = true, label = "Red", onClicked = {})
 }
 
 @Composable
-fun StackedBoxes(
-    isOuterBoxShow: Boolean,
-    isMiddleBoxShow: Boolean,
-    isInnerBoxShow: Boolean
-) {
+fun ConstrainedLayoutDemo() {
+    var red by remember {
+        mutableStateOf(true)
+    }
+    var green by remember {
+        mutableStateOf(true)
+    }
+    var blue by remember {
+        mutableStateOf(true)
+    }
 
-    Box(
+
+    ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 16.dp)
+            .padding(16.dp)
     ) {
-        if (isOuterBoxShow) {
+        val (cbRed, cbGreen, cbBlue, boxRed, boxGreen, boxBlue) = createRefs()
+
+        CheckBoxWithLabel(
+            checked = red,
+            label = "Red",
+            onClicked = { red = it },
+            modifier = Modifier.constrainAs(cbRed) {
+                top.linkTo(parent.top)
+            }
+        )
+
+        CheckBoxWithLabel(
+            checked = green,
+            label = "Green",
+            onClicked = { green = it },
+            modifier = Modifier.constrainAs(cbGreen) {
+                top.linkTo(cbRed.bottom)
+            }
+        )
+
+        CheckBoxWithLabel(
+            checked = blue,
+            label = "Blue",
+            onClicked = { blue = it },
+            modifier = Modifier.constrainAs(cbBlue) {
+                top.linkTo(cbGreen.bottom)
+            }
+        )
+
+        if (red) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
                     .background(Color.Red)
+                    .constrainAs(boxRed) {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        top.linkTo(cbBlue.bottom, margin = 16.dp)
+                        bottom.linkTo(parent.bottom)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints
+                    }
             )
         }
 
-        if (isMiddleBoxShow) {
+        if (green) {
             Box(
-                modifier = Modifier.fillMaxSize()
-                    .padding(32.dp)
+                modifier = Modifier
                     .background(Color.Green)
+                    .constrainAs(boxGreen) {
+                        start.linkTo(parent.start, margin = 32.dp)
+                        end.linkTo(parent.end, margin = 32.dp)
+                        top.linkTo(cbBlue.bottom, margin = (16 + 32).dp)
+                        bottom.linkTo(parent.bottom, margin = 32.dp)
+
+                        width = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints
+                    }
             )
         }
 
-        if (isInnerBoxShow) {
+        if (blue) {
             Box(
-                modifier = Modifier.fillMaxSize()
-                    .padding(64.dp)
+                modifier = Modifier
                     .background(Color.Blue)
+                    .constrainAs(boxBlue) {
+                        start.linkTo(parent.start, margin = 64.dp)
+                        end.linkTo(parent.end, margin = 64.dp)
+                        top.linkTo(cbBlue.bottom, margin = (16 + 64).dp)
+                        bottom.linkTo(parent.bottom, margin = 64.dp)
+
+                        width = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints
+                    }
             )
         }
     }
@@ -167,6 +182,6 @@ fun StackedBoxes(
 
 @Preview
 @Composable
-fun Preview_StackedBoxes() {
-    StackedBoxes(isOuterBoxShow = true, isMiddleBoxShow = true, isInnerBoxShow = true)
+fun Preview_ConstraintLayoutDemo() {
+    ConstrainedLayoutDemo()
 }
