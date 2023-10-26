@@ -6,12 +6,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.DrawModifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.learncompose.ui.theme.LearnComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -35,8 +38,21 @@ class MainActivity : ComponentActivity() {
 fun App() {
 }
 
+@Preview(
+    widthDp = 400,
+    heightDp = 300
+)
 @Composable
-fun My
+fun MyCustomText() {
+    Text(
+        text = "Hello Compose",
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.headlineLarge,
+        modifier = Modifier
+            .fillMaxSize()
+            .drawYellowCross()
+    )
+}
 
 fun Modifier.drawYellowCross() = then(
     object : DrawModifier {
