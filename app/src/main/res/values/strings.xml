@@ -6,4 +6,6 @@
     <string name="done">Done</string>
     <string name="number_select_pattern">%1$d!</string>
     <string name="number_result_pattern">%1$d! = %2$d</string>
+    <string name="huashi">华氏</string>
+    <string name="sheshi">摄氏</string>
 </resources>

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.learncompose.ui.theme.LearnComposeTheme
@@ -47,182 +51,196 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun App() {
-    TemperatureDemo()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TemperatureTextField(
+    temperatrue: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    callback: () -> Unit,
+) {
+    TextField(
+        value = temperatrue,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        placeholder = {
+            Text(text = "输入温度")
+        },
+        singleLine = true,
+        keyboardActions = KeyboardActions(onAny = {
+            callback()
+        }),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Done
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TemperatureTextField() {
+    var temperatrue by remember {
+        mutableStateOf("")
+    }
+
+    TemperatureTextField(
+        temperatrue = temperatrue,
+        onValueChange = { temperatrue = it },
+        modifier = Modifier.fillMaxWidth()
+    ) {}
+}
+
+@Composable
+fun TemperatureRadioButton(
+    selected: Boolean,
+    resId: Int,
+    onClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = {
+                onClick(resId)
+            }
+        )
+
+        Text(
+            text = stringResource(id = resId),
+            modifier = Modifier.padding(
+                start = 8.dp
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TemperatureRadioButton() {
+    var selected by remember {
+        mutableStateOf(true)
+    }
+
+    TemperatureRadioButton(
+        selected = selected,
+        resId = R.string.huashi,
+        onClick = {}
+    )
+}
+
+@Composable
+fun TemperatureScaleButtonGroup(
+    selected: Int,
+    modifier: Modifier = Modifier,
+    radioButtonClick: (Int) -> Unit
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TemperatureRadioButton(
+            selected = selected == R.string.huashi,
+            resId = R.string.huashi,
+            onClick = { tagId ->
+                radioButtonClick(tagId)
+            }
+        )
+
+        TemperatureRadioButton(
+            selected = selected == R.string.sheshi,
+            resId = R.string.sheshi,
+            onClick = { tagId ->
+                radioButtonClick(tagId)
+            }
+        )
+    }
 }
 
 @Preview
 @Composable
-fun TemperatureDemo() {
+fun TemperatureScaleButtonGroup() {
+    var selectedId by remember {
+        mutableStateOf(R.string.huashi)
+    }
+
+    TemperatureScaleButtonGroup(selected = selectedId) {
+        selectedId = it
+    }
+}
+
+@Preview
+@Composable
+fun FlowOfEventDemo() {
+    var temperature by remember {
+        mutableStateOf("")
+    }
+    var convertedTemperature by remember {
+        mutableStateOf(0F)
+    }
+    var scale by remember {
+        mutableStateOf(R.string.huashi)
+    }
+    val huaShiStr = "华氏"
+    val sheShiStr = "摄氏"
+
+    val calc = {
+        val temp = temperature.toFloat()
+        convertedTemperature = if (scale == R.string.sheshi)
+            (temp * 1.8F) + 32F
+        else
+            (temp - 32F) / 1.8F
+    }
+    var result = remember(convertedTemperature) {
+        if (convertedTemperature.isNaN())
+            ""
+        else
+            "${convertedTemperature}${
+                if (scale == R.string.huashi)
+                    sheShiStr
+                else
+                    huaShiStr
+            }"
+    }
+    var enabled = temperature.isNotBlank()
+
     Column(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var temperature by remember {
-            mutableStateOf("0")
-        }
-        val options = listOf("华氏", "摄氏")
-        var selectedOption by remember {
-            mutableStateOf(options[0])
-        }
-        var convertedTemperature by remember {
-            mutableStateOf("0.00")
+        TemperatureTextField(
+            temperatrue = temperature,
+            onValueChange = { temperature = it }
+        ) {
+            calc()
         }
 
-
-        TemperaturePanel(
-            temperature = temperature,
-            onTemperatureChange = {
-                temperature = it
-            },
-            options = options,
-            selectedOption = selectedOption,
-            onOptionSelected = {
-                selectedOption = it
+        TemperatureScaleButtonGroup(
+            selected = scale,
+            radioButtonClick = {
+                scale = it
             }
         )
 
         Button(
             onClick = {
-                convertedTemperature = convertTemperature(
-                    temperature.toFloat() ?: 0f,
-                    selectedOption
-                )
-            }
+                calc()
+            },
+            enabled = enabled
         ) {
-            Text(
-                text = "convert"
-            )
+            Text(text = "Convert")
         }
 
-        Text(text = convertedTemperature)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TemperaturePanel(
-    temperature: String,
-    onTemperatureChange: (String) -> Unit,
-    options: List<String>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit
-) {
-    Column {
-        TextField(
-            value = temperature.toString(),
-            onValueChange = onTemperatureChange,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        RadioButtonGroup(
-            options = options,
-            selectedOption = selectedOption,
-            onOptionSelected = onOptionSelected,
-            modifier = Modifier
-        )
-    }
-}
-
-@Preview
-@Composable
-fun TemperaturePanel() {
-    var temparature by remember {
-        mutableStateOf("36.5")
-    }
-    val options = listOf("华氏", "摄氏")
-    var selectedOption by remember {
-        mutableStateOf(options[0])
-    }
-
-    TemperaturePanel(
-        temperature = temparature,
-        onTemperatureChange = {
-            temparature = it
-        },
-        options = options,
-        selectedOption = selectedOption,
-        onOptionSelected = {
-            selectedOption = it
-        }
-    )
-}
-
-@Composable
-fun RadioButtonGroup(
-    options: List<String>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        options.forEach { label ->
-            RadioButtonWithLabel(
-                option = label,
-                selected = selectedOption == label
-            ) {
-                onOptionSelected(label)
-            }
+        if (result.isNotBlank()) {
+            Text(text = result)
         }
     }
-}
-
-@Preview
-@Composable
-fun RadioButtonGroup() {
-    val options = listOf<String>("华氏", "摄氏")
-    var selectedOption by remember {
-        mutableStateOf(options[0])
-    }
-
-    RadioButtonGroup(
-        options = options,
-        selectedOption = selectedOption,
-        onOptionSelected = { selectedLabel ->
-            selectedOption = selectedLabel
-        }
-    )
-}
-
-@Composable
-fun RadioButtonWithLabel(
-    option: String,
-    selected: Boolean,
-    onOptionSelected: () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(selected = selected, onClick = onOptionSelected)
-        Text(
-            text = option,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(
-                end = 16.dp
-            )
-        )
-    }
-}
-
-private fun convertTemperature(
-    temperature: Float,
-    currentUnit: String,
-): String {
-    lateinit var res: String
-
-    if (currentUnit == "华氏") {
-        val tmp = (temperature - 32) / 1.8
-
-        res = "${tmp}摄氏度"
-    } else {
-        val tmp = (temperature * 1.8) + 32
-
-        res = "${tmp}华氏度"
-    }
-
-    return res
 }
