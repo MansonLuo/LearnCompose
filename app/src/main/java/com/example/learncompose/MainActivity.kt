@@ -3,10 +3,13 @@ package com.example.learncompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -44,33 +47,119 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun App() {
-    RadioButtonGroup()
+    TemperatureDemo()
+}
+
+@Preview
+@Composable
+fun TemperatureDemo() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        var temperature by remember {
+            mutableStateOf("0")
+        }
+        val options = listOf("华氏", "摄氏")
+        var selectedOption by remember {
+            mutableStateOf(options[0])
+        }
+        var convertedTemperature by remember {
+            mutableStateOf("0.00")
+        }
+
+
+        TemperaturePanel(
+            temperature = temperature,
+            onTemperatureChange = {
+                temperature = it
+            },
+            options = options,
+            selectedOption = selectedOption,
+            onOptionSelected = {
+                selectedOption = it
+            }
+        )
+
+        Button(
+            onClick = {
+                convertedTemperature = convertTemperature(
+                    temperature.toFloat() ?: 0f,
+                    selectedOption
+                )
+            }
+        ) {
+            Text(
+                text = "convert"
+            )
+        }
+
+        Text(text = convertedTemperature)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemperaturePanel(
-    temperature: Float,
+    temperature: String,
     onTemperatureChange: (String) -> Unit,
-    unit: TemperatureUnit,
-    onUnitChange: () -> Unit
-) {
-    Column {
-        TextField(
-            value = temperature.toString(),
-            onValueChange = onTemperatureChange
-        )
-    }
-}
-
-
-@Composable
-fun RadioButtonGroup(
     options: List<String>,
     selectedOption: String,
     onOptionSelected: (String) -> Unit
 ) {
     Column {
+        TextField(
+            value = temperature.toString(),
+            onValueChange = onTemperatureChange,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        RadioButtonGroup(
+            options = options,
+            selectedOption = selectedOption,
+            onOptionSelected = onOptionSelected,
+            modifier = Modifier
+        )
+    }
+}
+
+@Preview
+@Composable
+fun TemperaturePanel() {
+    var temparature by remember {
+        mutableStateOf("36.5")
+    }
+    val options = listOf("华氏", "摄氏")
+    var selectedOption by remember {
+        mutableStateOf(options[0])
+    }
+
+    TemperaturePanel(
+        temperature = temparature,
+        onTemperatureChange = {
+            temparature = it
+        },
+        options = options,
+        selectedOption = selectedOption,
+        onOptionSelected = {
+            selectedOption = it
+        }
+    )
+}
+
+@Composable
+fun RadioButtonGroup(
+    options: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth()
+    ) {
         options.forEach { label ->
             RadioButtonWithLabel(
                 option = label,
@@ -92,10 +181,11 @@ fun RadioButtonGroup() {
 
     RadioButtonGroup(
         options = options,
-        selectedOption = selectedOption
-    ) { selectedLabel ->
-        selectedOption = selectedLabel
-    }
+        selectedOption = selectedOption,
+        onOptionSelected = { selectedLabel ->
+            selectedOption = selectedLabel
+        }
+    )
 }
 
 @Composable
@@ -118,16 +208,21 @@ fun RadioButtonWithLabel(
     }
 }
 
-sealed class TemperatureUnit {
-    object HuaShi: TemperatureUnit() {
-        override fun toString(): String {
-            return "华氏"
-        }
+private fun convertTemperature(
+    temperature: Float,
+    currentUnit: String,
+): String {
+    lateinit var res: String
+
+    if (currentUnit == "华氏") {
+        val tmp = (temperature - 32) / 1.8
+
+        res = "${tmp}摄氏度"
+    } else {
+        val tmp = (temperature * 1.8) + 32
+
+        res = "${tmp}华氏度"
     }
 
-    object SheShi: TemperatureUnit() {
-        override fun toString(): String {
-            return "摄氏"
-        }
-    }
+    return res
 }
