@@ -13,7 +13,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
+import com.example.learncompose.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -22,7 +24,8 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
+    //primary = Purple40,
+    primary = AndroidGreen,
     secondary = PurpleGrey40,
     tertiary = Pink40
 
@@ -51,7 +54,9 @@ fun LearnComposeTheme(
         }
 
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> LightColorScheme.copy(
+            secondary = colorResource(id = R.color.orange_dark)
+        )
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
