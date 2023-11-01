@@ -3,7 +3,6 @@
 
     <style name="Theme.LearnCompose" parent="android:Theme.Material.Light.NoActionBar" />
     <style name="Theme.ComposeUnitConverter" parent="Theme.Material3.DayNight">
-        
         <item name="android:statusBarColor">
             @color/android_green_dark
         </item>
