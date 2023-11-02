@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.learncompose.R
 
 sealed class ComposeUnitConverterScreen(
-    val router: String,
+    val route: String,
     @StringRes val label: Int,
     val icon: ImageVector
 ) {

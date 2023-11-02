@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.BottomAppBar
@@ -14,6 +15,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -25,12 +27,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.learncompose.screens.ComposeUnitConverterScreen
+import com.example.learncompose.screens.DistancesConverter
+import com.example.learncompose.screens.TemperatureConverter
 import com.example.learncompose.ui.theme.ComposeUnitConverterTheme
 import com.example.learncompose.viewmodels.ViewModelFactory
 import kotlinx.coroutines.launch
@@ -67,12 +78,24 @@ fun ComposeUnitConverter(factory: ViewModelFactory) {
                 }
             },
             bottomBar = {
-
+                ComposeUnitConverterBottomBar(navController = navController)
             }
         ) {
-
+            ComposeUnitConverterNavHost(
+                navController = navController,
+                factory = factory,
+                modifier = Modifier.padding(it)
+            )
         }
     }
+}
+
+@Preview
+@Composable
+fun Preview_ComposeUnitConverter() {
+    val factory = ViewModelFactory(Repository())
+    
+    ComposeUnitConverter(factory = factory)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,6 +167,52 @@ fun ComposeUnitConverterBottomBar(
         val currentDestination = navBackStackEntry?.destination
 
         ComposeUnitConverterScreen.screens.forEach { screen ->
+            NavigationBarItem(
+                selected = currentDestination?.hierarchy?.any {
+                    it.route == screen.route } == true,
+                //selected = currentDestination?.route == screen.route
+                onClick = {
+                    navController.navigate(screen.route) {
+                        launchSingleTop = true
+                    }
+                },
+                label = {
+                    Text(text = stringResource(id = screen.label))
+                },
+                icon = {
+                    Icon(
+                        imageVector = screen.icon,
+                        contentDescription = stringResource(id = screen.label)
+                    )
+                },
+                alwaysShowLabel = true
+            )
+        }
+    }
+}
+
+@Composable
+fun ComposeUnitConverterNavHost(
+    navController: NavHostController,
+    factory: ViewModelProvider.Factory?,
+    modifier: Modifier
+) {
+
+    NavHost(
+        navController = navController,
+        startDestination = ComposeUnitConverterScreen.route_temperature,
+        modifier = modifier
+    ) {
+        composable(ComposeUnitConverterScreen.route_temperature) {
+            TemperatureConverter(
+                viewModel(factory = factory)
+            )
+        }
+
+        composable(ComposeUnitConverterScreen.route_distances) {
+            DistancesConverter(
+                viewModel(factory = factory)
+            )
         }
     }
 }
