@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val factory = ViewModelFactory(Repository())
+        val factory = ViewModelFactory(Repository(applicationContext))
         setContent {
             ComposeUnitConverter(factory = factory)
         }
@@ -93,9 +93,9 @@ fun ComposeUnitConverter(factory: ViewModelFactory) {
 @Preview
 @Composable
 fun Preview_ComposeUnitConverter() {
-    val factory = ViewModelFactory(Repository())
+    //val factory = ViewModelFactory(Repository())
     
-    ComposeUnitConverter(factory = factory)
+    //ComposeUnitConverter(factory = factory)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
