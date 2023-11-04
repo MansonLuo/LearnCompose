@@ -1,12 +1,11 @@
 package com.example.learncompose
 
-import android.content.Context
-import androidx.preference.PreferenceManager
+import android.content.SharedPreferences
 
 class Repository(
-    context: Context
+    private val pref: SharedPreferences
 ) {
-    private val pref = PreferenceManager.getDefaultSharedPreferences(context)
+    //private val pref = PreferenceManager.getDefaultSharedPreferences(context)
 
     fun getInt(key: String, default: Int): Int {
         return pref.getInt(key, default)

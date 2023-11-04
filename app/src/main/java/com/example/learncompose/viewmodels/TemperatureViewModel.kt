@@ -26,6 +26,7 @@ class TemperatureViewModel(private val repository: Repository) : ViewModel() {
     private val _temperature: MutableStateFlow<String> = MutableStateFlow(
         repository.getString("temperature", "")
     )
+
     val temperature: StateFlow<String>
         get() = _temperature
 

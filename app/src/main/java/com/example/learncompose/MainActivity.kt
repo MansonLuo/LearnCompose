@@ -39,6 +39,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.preference.PreferenceManager
 import com.example.learncompose.screens.ComposeUnitConverterScreen
 import com.example.learncompose.screens.DistancesConverter
 import com.example.learncompose.screens.TemperatureConverter
@@ -49,12 +50,13 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val factory = ViewModelFactory(Repository(applicationContext))
+        val sp = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val factory = ViewModelFactory(Repository(sp))
         setContent {
-            //ComposeUnitConverter(factory = factory)
+            ComposeUnitConverter(factory = factory)
             //LaunchEffectDemo()
             //StopWatchWithoutLaunchEffect()
-            StopWatchWithDisposableEffect()
+            //StopWatchWithDisposableEffect()
         }
     }
 }
