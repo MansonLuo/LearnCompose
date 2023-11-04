@@ -8,9 +8,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -149,5 +151,77 @@ class StopWatchViewModel: ViewModel() {
         job?.cancel()
 
         _count.value = 0
+    }
+}
+
+@Composable
+fun StopWatchWithDisposableEffect() {
+    var clickCount by rememberSaveable {
+        mutableStateOf(0)
+    }
+    var count by rememberSaveable {
+        mutableStateOf(0)
+    }
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier.padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Button(
+                onClick = {
+                    clickCount += 1
+                }
+            ) {
+                if (clickCount > 0)
+                    Text(text = "Restart")
+                else
+                    Text(text = "Start")
+            }
+
+            Button(
+                enabled = clickCount > 0,
+                onClick = {
+                    clickCount = 0
+                    count = 0
+                }
+            ) {
+                Text(text = "Stop")
+            }
+        }
+
+        if (clickCount > 0) {
+            var job: Job? = null
+
+            DisposableEffect(key1 = clickCount) {
+
+                job = scope.launch {
+                    count = 0
+
+                    while (isActive) {
+                        count += 1
+
+                        delay(1000)
+                    }
+                }
+
+                onDispose {
+                    job?.cancel()
+                    count = 0
+                }
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
     }
 }

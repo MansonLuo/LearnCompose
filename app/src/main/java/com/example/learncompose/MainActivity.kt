@@ -53,7 +53,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             //ComposeUnitConverter(factory = factory)
             //LaunchEffectDemo()
-            StopWatchWithoutLaunchEffect()
+            //StopWatchWithoutLaunchEffect()
+            StopWatchWithDisposableEffect()
         }
     }
 }
