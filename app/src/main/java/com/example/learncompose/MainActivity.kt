@@ -51,7 +51,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val factory = ViewModelFactory(Repository(applicationContext))
         setContent {
-            ComposeUnitConverter(factory = factory)
+            //ComposeUnitConverter(factory = factory)
+            //LaunchEffectDemo()
+            StopWatchWithoutLaunchEffect()
         }
     }
 }

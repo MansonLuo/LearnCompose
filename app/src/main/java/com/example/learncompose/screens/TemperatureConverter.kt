@@ -17,7 +17,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,23 +36,24 @@ fun TemperatureConverter(
 
     val currentValue = viewModel.temperature.collectAsStateWithLifecycle()
     val scale = viewModel.scale.collectAsStateWithLifecycle()
-    var result by remember {
-        mutableStateOf("")
+    val convertedTemperature by viewModel.convertedTemperature.collectAsStateWithLifecycle()
+    val result by remember(convertedTemperature) {
+        mutableStateOf(
+            if (convertedTemperature.isNaN())
+                ""
+            else
+                "$convertedTemperature${
+                    if (scale.value == R.string.celsius)
+                        strFahrenheit
+                    else
+                        strCelsius
+                }"
+        )
     }
     val calc = {
-        val temp = viewModel.convert()
-
-        result = if (temp.isNaN())
-            ""
-        else
-            "$temp${
-                if (scale.value == R.string.celsius)
-                    strFahrenheit
-                else
-                    strCelsius
-            }"
+        viewModel.convert()
     }
-    val enabled by remember( currentValue.value) {
+    val enabled by remember(currentValue.value) {
         mutableStateOf(
             !viewModel.getTemperatureAsFloat().isNaN()
         )
