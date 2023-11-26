@@ -53,10 +53,6 @@ class MainActivity : ComponentActivity() {
         val sp = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val factory = ViewModelFactory(Repository(sp))
         setContent {
-            ComposeUnitConverter(factory = factory)
-            //LaunchEffectDemo()
-            //StopWatchWithoutLaunchEffect()
-            //StopWatchWithDisposableEffect()
         }
     }
 }
